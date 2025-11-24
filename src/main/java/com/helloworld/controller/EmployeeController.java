@@ -1,50 +1,53 @@
 package com.helloworld.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import com.helloworld.model.Employee;
-import com.helloworld.repository.EmployeeRepository;
-import org.springframework.http.ResponseEntity;
-import java.util.*;
+import com.helloworld.services.EmployeeService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/employees")
 @CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor   // ✨ Lombok constructor
+@Slf4j   // Optional for logging
 public class EmployeeController {
 
-    @Autowired
-    private EmployeeRepository repo;
+    private final EmployeeService service; // Lombok generates constructor automatically
 
     @GetMapping
     public List<Employee> getAllEmployees() {
-        return repo.findAll();
+        log.info("Fetching all employees...");
+        return service.getAllEmployees();
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addEmployee(@RequestBody Employee emp) {
-        if (repo.existsById(emp.getEmpId())) {
-            return ResponseEntity.status(400).body(Map.of("message", "Employee ID already exists!"));
-        }
-        repo.save(emp);
-        return ResponseEntity.ok(Map.of("message", "Employee added successfully!"));
+    public Employee addEmployee(@RequestBody Employee employee) {
+        log.info("Adding employee: {}", employee.getName());
+        return service.addEmployee(employee);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEmployee(@PathVariable String id, @RequestBody Employee emp) {
-        if (!repo.existsById(id)) {
-            return ResponseEntity.status(404).body(Map.of("message", "Employee not found!"));
-        }
-        emp.setEmpId(id);
-        repo.save(emp);
-        return ResponseEntity.ok(Map.of("message", "Employee updated successfully!"));
+    public Employee updateEmployee(@PathVariable String id, @RequestBody Employee employee) {
+        log.info("Updating employee with ID: {}", id);
+        return service.updateEmployee(id, employee);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEmployee(@PathVariable String id) {
-        if (!repo.existsById(id)) {
-            return ResponseEntity.status(404).body(Map.of("message", "Employee not found!"));
-        }
-        repo.deleteById(id);
-        return ResponseEntity.ok(Map.of("message", "Employee deleted successfully!"));
+    public void deleteEmployee(@PathVariable String id) {
+        log.warn("Deleting employee with ID: {}", id);
+        service.deleteEmployee(id);
+    }
+
+    @GetMapping("/directories")
+    public List<String> getDirectories() {
+        return service.getAllDirectories();
+    }
+
+    @GetMapping("/divisions/{directory}")
+    public List<String> getDivisions(@PathVariable String directory) {
+        return service.getDivisionsByDirectory(directory);
     }
 }
