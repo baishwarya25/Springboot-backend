@@ -232,3 +232,4 @@ Title: Employee Joining Trend
 🔹 STEP 7: Save Dashboard
 
 
+https://grafana.com/grafana/download?platform=windows
