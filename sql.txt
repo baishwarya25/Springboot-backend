@@ -62,4 +62,173 @@ INSERT INTO DIRECTORY_DIVISION (DIRECTORY, DIVISION) VALUES ('DOVI', 'Networking
 COMMIT;
 
 
+SQL DEVELOPER
+SELECT
+  EMP_ID,
+  TYPE,
+  ID_NO,
+  TITLE,
+  NAME,
+  DESIGNATION,
+  DIRECTORY,
+  DIVISION,
+  DATE_OF_JOIN,
+  DATE_OF_POST,
+  QUALIFICATION,
+  DISCIPLINE,
+  GENDER,
+  BLOOD_GROUP,
+  PHONE,
+  ADDRESS,
+  PERMANENT_ADDRESS,
+  DOB
+FROM EMPLOYEE_DETAILS;
+
+
+SQL WORKBENCH
+
+CREATE DATABASE employee_db;
+USE employee_db;
+
+CREATE TABLE employees (
+  emp_id VARCHAR(255) NOT NULL,
+  type VARCHAR(255),
+  id_no VARCHAR(255),
+  title VARCHAR(255),
+  name VARCHAR(255),
+  designation VARCHAR(255),
+  directory VARCHAR(255),
+  division VARCHAR(255),
+  date_of_join DATE,
+  date_of_post DATE,
+  qualification VARCHAR(255),
+  discipline VARCHAR(255),
+  gender VARCHAR(255),
+  blood_group VARCHAR(255),
+  phone VARCHAR(255),
+  address VARCHAR(255),
+  permanent_address VARCHAR(255),
+  dob DATE
+);
+
+DESCRIBE employees;
+
+USE employee_db;
+
+LOAD DATA INFILE
+'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/employee_details.csv'
+INTO TABLE employees
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(
+  emp_id,
+  type,
+  id_no,
+  title,
+  name,
+  designation,
+  directory,
+  division,
+  @date_of_join,
+  @date_of_post,
+  qualification,
+  discipline,
+  gender,
+  blood_group,
+  phone,
+  address,
+  permanent_address,
+  @dob
+)
+SET
+  date_of_join = STR_TO_DATE(@date_of_join, '%d-%m-%Y'),
+  date_of_post = STR_TO_DATE(@date_of_post, '%d-%m-%Y'),
+  dob = STR_TO_DATE(@dob, '%d-%m-%Y');
+
+
+SHOW VARIABLES LIKE 'secure_file_priv';
+
+SELECT COUNT(*) FROM employees;
+
+SELECT gender, COUNT(*) 
+FROM employees
+GROUP BY gender;
+
+Perfect 👍
+That green message “Database Connection OK” means your setup is 100% successful.
+Now you are in the final and easiest stage.
+
+✅ WHAT TO DO NEXT (STEP-BY-STEP)
+🔹 STEP 1: Create a Dashboard
+
+Click ➕ Create (left side or top right)
+
+Select Dashboard
+
+Click Add new panel
+
+🔹 STEP 2: Select Data Source
+
+In the panel editor (right side):
+
+Data source → select MySQL (the one you just connected)
+
+🔹 STEP 3: Add Your FIRST Query (Total Employees)
+
+In the Query editor, paste this:
+
+SELECT COUNT(*) AS total_employees
+FROM employees;
+
+Panel settings:
+
+Visualization: Stat
+
+Title: Total Employees
+
+👉 You should see 10 (your data count)
+
+🔹 STEP 4: Add Second Panel (Gender Distribution)
+
+Click Add panel
+
+Use this query:
+
+SELECT gender, COUNT(*) AS value
+FROM employees
+GROUP BY gender;
+
+Panel settings:
+
+Visualization: Pie chart
+
+Title: Employees by Gender
+
+🔹 STEP 5: Add Third Panel (Designation-wise Count)
+SELECT designation, COUNT(*) AS value
+FROM employees
+GROUP BY designation;
+
+
+Visualization: Bar chart
+
+Title: Employees by Designation
+
+🔹 STEP 6: Add Time-Based Panel (Joining Trend)
+SELECT
+  date_of_join AS time,
+  COUNT(*) AS value
+FROM employees
+GROUP BY date_of_join
+ORDER BY date_of_join;
+
+
+Visualization: Time series
+
+Title: Employee Joining Trend
+
+🔹 STEP 7: Save Dashboard
+
 
