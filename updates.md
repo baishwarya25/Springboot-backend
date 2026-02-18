@@ -6,105 +6,83 @@ package com.helloworld.controller;
 
 
 
-import com.helloworld.model.Employee;
+import org.springframework.beans.factory.annotation.Value;
 
-import com.helloworld.services.EmployeeService;
+import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.web.servlet.HandlerInterceptor;
 
-import lombok.extern.slf4j.Slf4j;
+import jakarta.servlet.http.HttpServletRequest;
 
-import org.springframework.web.bind.annotation.\*;
-
-
-
-import java.util.List;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 
-@RestController
+@Component
+
+public class GrafanaInterceptor implements HandlerInterceptor {
 
 
 
-@RequestMapping("/api/employees")
+&nbsp;   @Value("${grafana.api.token}")
 
-@CrossOrigin(origins = {"http://localhost:3001","http://localhost:3000"})
-
-@RequiredArgsConstructor   // ✨ Lombok constructor
-
-@Slf4j   // Optional for logging
-
-public class EmployeeController {
+&nbsp;   private String secretToken;
 
 
 
-&nbsp;   private final EmployeeService service; // Lombok generates constructor automatically
+&nbsp;   @Override
+
+&nbsp;   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+
+&nbsp;       
+
+&nbsp;       // 1. Check where the request is coming from (Origin)
+
+&nbsp;       String origin = request.getHeader("Origin");
+
+&nbsp;       
+
+&nbsp;       // 2. Get the Authorization Header (for Grafana)
+
+&nbsp;       String authHeader = request.getHeader("Authorization");
 
 
 
-&nbsp;   @GetMapping
+&nbsp;       // OPTION A: If it's your React Frontend, let it through immediately
 
-&nbsp;   public List<Employee> getAllEmployees() {
+&nbsp;       if ("http://localhost:3001".equals(origin)) {
 
-&nbsp;       log.info("Fetching all employees...");
+&nbsp;           return true;
 
-&nbsp;       return service.getAllEmployees();
-
-&nbsp;   }
+&nbsp;       }
 
 
 
-&nbsp;   @PostMapping("/add")
+&nbsp;       // OPTION B: If it's Grafana, check for the secret token
 
-&nbsp;   public Employee addEmployee(@RequestBody Employee employee) {
+&nbsp;       if (authHeader != null \&\& authHeader.equals("Bearer " + secretToken)) {
 
-&nbsp;       log.info("Adding employee: {}", employee.getName());
+&nbsp;           return true;
 
-&nbsp;       return service.addEmployee(employee);
-
-&nbsp;   }
+&nbsp;       }
 
 
 
-&nbsp;   @PutMapping("/{id}")
+&nbsp;       // OPTION C: If it's a browser test (no origin) and matches token, let it through
 
-&nbsp;   public Employee updateEmployee(@PathVariable String id, @RequestBody Employee employee) {
+&nbsp;       if (authHeader != null \&\& authHeader.equals("Bearer " + secretToken)) {
 
-&nbsp;       log.info("Updating employee with ID: {}", id);
+&nbsp;           return true;
 
-&nbsp;       return service.updateEmployee(id, employee);
-
-&nbsp;   }
+&nbsp;       }
 
 
 
-&nbsp;   @DeleteMapping("/{id}")
+&nbsp;       // If neither, block the request
 
-&nbsp;   public void deleteEmployee(@PathVariable String id) {
+&nbsp;       response.setStatus(HttpServletResponse.SC\_UNAUTHORIZED);
 
-&nbsp;       log.warn("Deleting employee with ID: {}", id);
-
-&nbsp;       service.deleteEmployee(id);
-
-&nbsp;   }
-
-
-
-&nbsp;   @GetMapping("/directories")
-
-&nbsp;   public List<String> getDirectories() {
-
-&nbsp;       return service.getAllDirectories();
-
-&nbsp;   }
-
-
-
-&nbsp;   @GetMapping("/divisions/{directory}")
-
-&nbsp;   public List<String> getDivisions(@PathVariable String directory) {
-
-&nbsp;       return service.getDivisionsByDirectory(directory);
+&nbsp;       return false;
 
 &nbsp;   }
 
